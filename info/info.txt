@@ -1,0 +1,12 @@
+http://127.0.0.1:3000/
+
+SEMRUSH_API_KEY=36034d6216c03c8cabbfd0019c7e12b3
+PORT=3000
+HOST=127.0.0.1
+
+animal abuse
+animal cruelty
+
+flight attendant
+stewardess
+

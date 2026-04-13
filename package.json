@@ -1,0 +1,14 @@
+{
+  "name": "intent-term",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Internal term comparison tool powered by the Semrush API.",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
