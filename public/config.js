@@ -1,0 +1,3 @@
+window.TERMINTENT_CONFIG = {
+  API_BASE_URL: ""
+};

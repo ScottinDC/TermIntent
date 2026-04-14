@@ -16,6 +16,16 @@ const railSecondaryEl = document.querySelector("#rail-secondary");
 const railGoalEl = document.querySelector("#rail-goal");
 
 let lastResult = null;
+const appConfig = window.TERMINTENT_CONFIG || {};
+const apiBaseUrl = String(appConfig.API_BASE_URL || "").trim().replace(/\/$/, "");
+
+function buildApiUrl(path) {
+  if (!apiBaseUrl) {
+    return path;
+  }
+
+  return `${apiBaseUrl}${path}`;
+}
 
 function shouldShowKeywordDifficulty(goal) {
   return goal === "seo_page" || goal === "ad_copy";
@@ -195,13 +205,13 @@ async function submitComparison(event) {
   event.preventDefault();
   compareButton.disabled = true;
   resultsSection.classList.add("hidden");
-  setStatus("Comparing terms against SEMrush…");
+  setStatus("Comparing terms against SEMrush...");
 
   const formData = new FormData(form);
   const payload = Object.fromEntries(formData.entries());
 
   try {
-    const response = await fetch("/api/compare", {
+    const response = await fetch(buildApiUrl("/api/compare"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -227,7 +237,11 @@ async function submitComparison(event) {
     keywordDifficultyHeaderEl.hidden = !shouldShowKeywordDifficulty(payload.goal);
     cpcHeaderEl.hidden = !shouldShowCpc(payload.goal);
     relatedKeywordHeaderEl.hidden = !shouldShowRelatedKeywords(payload.goal);
-    setStatus(error.message || "Comparison failed.", "error");
+    const fallbackMessage = apiBaseUrl
+      ? `Comparison failed. Confirm the API is live at ${apiBaseUrl}.`
+      : "Comparison failed. Configure TERMINTENT_CONFIG.API_BASE_URL for the hosted frontend.";
+    const message = error instanceof TypeError ? fallbackMessage : error.message || fallbackMessage;
+    setStatus(message, "error");
   } finally {
     compareButton.disabled = false;
   }
@@ -235,3 +249,7 @@ async function submitComparison(event) {
 
 form.addEventListener("submit", submitComparison);
 updateSummary();
+
+if (!apiBaseUrl && window.location.hostname.endsWith("github.io")) {
+  setStatus("Set TERMINTENT_CONFIG.API_BASE_URL in config.js before using the GitHub Pages site.", "error");
+}

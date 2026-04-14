@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: termintent-api
+    runtime: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: SEMRUSH_API_KEY
+        sync: false
+      - key: HOST
+        value: 0.0.0.0
+      - key: PORT
+        value: 10000
+      - key: ALLOWED_ORIGINS
+        value: https://scottindc.github.io

@@ -1,6 +1,6 @@
-# IntentTerm V1
+# IntentTerm
 
-Internal browser-based tool for comparing 2 to 10 candidate terms with Semrush data and recommending:
+Browser-based tool for comparing candidate terms with Semrush data and recommending:
 
 - best primary term
 - best secondary term
@@ -67,6 +67,56 @@ Notes:
 
 Then open [http://localhost:3000](http://localhost:3000).
 
+## Deploy architecture
+
+This repo is now set up for:
+
+- frontend on GitHub Pages
+- backend API on a separate Node host
+
+GitHub Pages serves the contents of [`public`](/Users/scottstadum/Desktop/Projects/Apps/AWE%20CHE%20/TermIntent/public). The API remains in [`server.js`](/Users/scottstadum/Desktop/Projects/Apps/AWE%20CHE%20/TermIntent/server.js) so the Semrush key stays on the server.
+
+## GitHub Pages deployment
+
+The workflow at [.github/workflows/deploy-pages.yml](/Users/scottstadum/Desktop/Projects/Apps/AWE%20CHE%20/TermIntent/.github/workflows/deploy-pages.yml) deploys the `public` folder to GitHub Pages on every push to `main`.
+
+Before pushing, set the API origin in [`public/config.js`](/Users/scottstadum/Desktop/Projects/Apps/AWE%20CHE%20/TermIntent/public/config.js):
+
+```js
+window.TERMINTENT_CONFIG = {
+  API_BASE_URL: "https://your-api-host.example.com"
+};
+```
+
+Then in GitHub:
+
+1. Open the repository settings.
+2. Go to Pages.
+3. Set the source to GitHub Actions.
+
+Your frontend URL will be:
+
+`https://scottindc.github.io/TermIntent/`
+
+## Backend deployment
+
+You can deploy the API to any Node host. A starter Render config is included in [`render.yaml`](/Users/scottstadum/Desktop/Projects/Apps/AWE%20CHE%20/TermIntent/render.yaml).
+
+Required backend environment variables:
+
+- `SEMRUSH_API_KEY`
+- `HOST=0.0.0.0`
+- `PORT=10000` on Render, or the port your host expects
+- `ALLOWED_ORIGINS=https://scottindc.github.io`
+
+If you want to allow both the GitHub Pages site and local development:
+
+```bash
+ALLOWED_ORIGINS=https://scottindc.github.io,http://127.0.0.1:3000
+```
+
+After the backend URL is live, update [`public/config.js`](/Users/scottstadum/Desktop/Projects/Apps/AWE%20CHE%20/TermIntent/public/config.js) to point to it and push again.
+
 ## Included in V1
 
 - Candidate term validation for blank and duplicate inputs
@@ -89,3 +139,4 @@ Then open [http://localhost:3000](http://localhost:3000).
 - The app uses the Semrush `phrase_these` endpoint for bulk keyword metrics and `phrase_related` to estimate related keyword count.
 - Related keyword count is calculated by counting returned related-keyword rows from Semrush.
 - CSV export is generated in the browser from the most recent comparison result.
+- Cross-origin requests are restricted by `ALLOWED_ORIGINS` on the backend.

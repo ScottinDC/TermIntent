@@ -12,9 +12,13 @@ const envPath = path.join(__dirname, ".env");
 loadDotEnv(envPath);
 
 const PORT = Number.parseInt(process.env.PORT || "3000", 10);
-const HOST = process.env.HOST || "127.0.0.1";
+const HOST = process.env.HOST || "0.0.0.0";
 const SEMRUSH_API_KEY = process.env.SEMRUSH_API_KEY || "";
 const SEMRUSH_ENDPOINT = "https://api.semrush.com/";
+const ALLOWED_ORIGINS = String(process.env.ALLOWED_ORIGINS || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 
 const DATABASES = {
   US: "us",
@@ -100,6 +104,27 @@ function text(res, statusCode, payload, contentType = "text/plain; charset=utf-8
     "Cache-Control": "no-store"
   });
   res.end(payload);
+}
+
+function getAllowedOrigin(origin) {
+  if (!origin) {
+    return "";
+  }
+
+  return ALLOWED_ORIGINS.includes(origin) ? origin : "";
+}
+
+function writeCorsHeaders(req, res) {
+  const allowedOrigin = getAllowedOrigin(req.headers.origin);
+  if (!allowedOrigin) {
+    return false;
+  }
+
+  res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Vary", "Origin");
+  return true;
 }
 
 function normalizeTerms(rawInput) {
@@ -618,7 +643,28 @@ async function serveStatic(req, res) {
 
 const server = createServer(async (req, res) => {
   try {
+    if (req.url === "/api/compare" && req.method === "OPTIONS") {
+      if (!writeCorsHeaders(req, res)) {
+        text(res, 403, "Origin not allowed.");
+        return;
+      }
+
+      res.writeHead(204);
+      res.end();
+      return;
+    }
+
+    if ((req.method === "GET" || req.method === "HEAD") && req.url === "/health") {
+      text(res, 200, "ok");
+      return;
+    }
+
     if (req.method === "POST" && req.url === "/api/compare") {
+      if (!writeCorsHeaders(req, res)) {
+        json(res, 403, { error: "Origin not allowed." });
+        return;
+      }
+
       if (!SEMRUSH_API_KEY) {
         json(res, 500, {
           error: "Missing SEMRUSH_API_KEY. Add it to the server environment before running comparisons."

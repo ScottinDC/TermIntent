@@ -35,7 +35,7 @@ body {
   color: var(--text);
   background:
     linear-gradient(rgba(247, 244, 236, 0.72), rgba(241, 242, 239, 0.78)),
-    url("/termintent-bg-02.png") center top / cover fixed no-repeat,
+    url("./termintent-bg-02.png") center top / cover fixed no-repeat,
     linear-gradient(180deg, #f7f7f5 0%, var(--bg) 100%);
 }
 
@@ -82,7 +82,7 @@ a {
   gap: 20px;
   background:
     linear-gradient(rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.92)),
-    url("/termintent-bg-03.jpg") center / 340px auto repeat,
+    url("./termintent-bg-03.jpg") center / 340px auto repeat,
     var(--surface);
 }
 
@@ -223,7 +223,7 @@ th,
   padding: 22px;
   background:
     linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)),
-    url("/termintent-bg-03.jpg") center / 340px auto repeat,
+    url("./termintent-bg-03.jpg") center / 340px auto repeat,
     var(--surface);
 }
 
