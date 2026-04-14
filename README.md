@@ -105,6 +105,7 @@ You can deploy the API to any Node host. A starter Render config is included in 
 Required backend environment variables:
 
 - `SEMRUSH_API_KEY`
+- `APP_PASSWORD`
 - `HOST=0.0.0.0`
 - `PORT=10000` on Render, or the port your host expects
 - `ALLOWED_ORIGINS=https://scottindc.github.io`
@@ -116,6 +117,12 @@ ALLOWED_ORIGINS=https://scottindc.github.io,http://127.0.0.1:3000
 ```
 
 After the backend URL is live, update [`public/config.js`](/Users/scottstadum/Desktop/Projects/Apps/AWE%20CHE%20/TermIntent/public/config.js) to point to it and push again.
+
+## Shared password gate
+
+Set `APP_PASSWORD` on the backend if you want the public frontend to require a shared password before anyone can run comparisons.
+
+This is a lightweight shared-secret gate, not full user-account authentication. It is useful for basic access control, but it should not be treated as a substitute for proper per-user auth.
 
 ## Included in V1
 

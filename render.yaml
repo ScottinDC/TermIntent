@@ -8,6 +8,8 @@ services:
     envVars:
       - key: SEMRUSH_API_KEY
         sync: false
+      - key: APP_PASSWORD
+        sync: false
       - key: HOST
         value: 0.0.0.0
       - key: PORT

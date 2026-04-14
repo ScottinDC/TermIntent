@@ -15,6 +15,7 @@ const PORT = Number.parseInt(process.env.PORT || "3000", 10);
 const HOST = process.env.HOST || "0.0.0.0";
 const SEMRUSH_API_KEY = process.env.SEMRUSH_API_KEY || "";
 const SEMRUSH_ENDPOINT = "https://api.semrush.com/";
+const APP_PASSWORD = process.env.APP_PASSWORD || "";
 const ALLOWED_ORIGINS = String(process.env.ALLOWED_ORIGINS || "")
   .split(",")
   .map((origin) => origin.trim())
@@ -122,9 +123,18 @@ function writeCorsHeaders(req, res) {
 
   res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-App-Password");
   res.setHeader("Vary", "Origin");
   return true;
+}
+
+function isAuthorized(req) {
+  if (!APP_PASSWORD) {
+    return true;
+  }
+
+  const providedPassword = String(req.headers["x-app-password"] || "");
+  return providedPassword === APP_PASSWORD;
 }
 
 function normalizeTerms(rawInput) {
@@ -662,6 +672,11 @@ const server = createServer(async (req, res) => {
     if (req.method === "POST" && req.url === "/api/compare") {
       if (!writeCorsHeaders(req, res)) {
         json(res, 403, { error: "Origin not allowed." });
+        return;
+      }
+
+      if (!isAuthorized(req)) {
+        json(res, 401, { error: "Unauthorized. Enter the correct shared password." });
         return;
       }
 

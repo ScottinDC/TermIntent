@@ -14,10 +14,46 @@ const metricSecondaryTermEl = document.querySelector("#metric-secondary-term");
 const railPrimaryEl = document.querySelector("#rail-primary");
 const railSecondaryEl = document.querySelector("#rail-secondary");
 const railGoalEl = document.querySelector("#rail-goal");
+const passwordInput = document.querySelector("#access-password");
+const savePasswordButton = document.querySelector("#save-password-button");
+const clearPasswordButton = document.querySelector("#clear-password-button");
+const authStatusEl = document.querySelector("#auth-status");
 
 let lastResult = null;
 const appConfig = window.TERMINTENT_CONFIG || {};
 const apiBaseUrl = String(appConfig.API_BASE_URL || "").trim().replace(/\/$/, "");
+const PASSWORD_STORAGE_KEY = "termintent.apiPassword";
+
+function getStoredPassword() {
+  try {
+    return window.sessionStorage.getItem(PASSWORD_STORAGE_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+function setStoredPassword(password) {
+  try {
+    if (password) {
+      window.sessionStorage.setItem(PASSWORD_STORAGE_KEY, password);
+    } else {
+      window.sessionStorage.removeItem(PASSWORD_STORAGE_KEY);
+    }
+  } catch {
+    // Ignore session storage failures.
+  }
+}
+
+function setAuthStatus(message, tone = "") {
+  authStatusEl.textContent = message;
+  authStatusEl.className = `auth-status ${tone}`.trim();
+}
+
+function syncPasswordUi() {
+  const password = getStoredPassword();
+  passwordInput.value = password;
+  setAuthStatus(password ? "Password saved for this browser session." : "Enter the shared password to run comparisons.", password ? "success" : "");
+}
 
 function buildApiUrl(path) {
   if (!apiBaseUrl) {
@@ -214,7 +250,8 @@ async function submitComparison(event) {
     const response = await fetch(buildApiUrl("/api/compare"), {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "X-App-Password": getStoredPassword()
       },
       body: JSON.stringify(payload)
     });
@@ -231,6 +268,7 @@ async function submitComparison(event) {
     explanationEl.textContent = data.explanation;
     resultsSection.classList.remove("hidden");
     setStatus("Comparison complete.", "success");
+    setAuthStatus("Password accepted.", "success");
   } catch (error) {
     lastResult = null;
     updateSummary(null, payload);
@@ -241,14 +279,36 @@ async function submitComparison(event) {
       ? `Comparison failed. Confirm the API is live at ${apiBaseUrl}.`
       : "Comparison failed. Configure TERMINTENT_CONFIG.API_BASE_URL for the hosted frontend.";
     const message = error instanceof TypeError ? fallbackMessage : error.message || fallbackMessage;
+    if (/password|unauthorized/i.test(message)) {
+      setAuthStatus("Incorrect or missing password.", "error");
+    }
     setStatus(message, "error");
   } finally {
     compareButton.disabled = false;
   }
 }
 
+function savePassword() {
+  setStoredPassword(passwordInput.value.trim());
+  syncPasswordUi();
+}
+
+function clearPassword() {
+  setStoredPassword("");
+  syncPasswordUi();
+}
+
 form.addEventListener("submit", submitComparison);
+savePasswordButton.addEventListener("click", savePassword);
+clearPasswordButton.addEventListener("click", clearPassword);
+passwordInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    event.preventDefault();
+    savePassword();
+  }
+});
 updateSummary();
+syncPasswordUi();
 
 if (!apiBaseUrl && window.location.hostname.endsWith("github.io")) {
   setStatus("Set TERMINTENT_CONFIG.API_BASE_URL in config.js before using the GitHub Pages site.", "error");

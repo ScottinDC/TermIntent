@@ -81,6 +81,27 @@
                 </div>
               </div>
 
+              <section class="auth-panel" aria-labelledby="access-heading">
+                <div class="auth-copy">
+                  <p class="section-kicker">Access</p>
+                  <h3 id="access-heading">Enter shared password</h3>
+                </div>
+
+                <div class="auth-controls">
+                  <label class="field auth-field">
+                    <span>Password</span>
+                    <input id="access-password" type="password" autocomplete="current-password" />
+                  </label>
+
+                  <div class="actions auth-actions">
+                    <button id="save-password-button" type="button">Unlock</button>
+                    <button id="clear-password-button" class="secondary" type="button">Clear</button>
+                  </div>
+                </div>
+
+                <p id="auth-status" class="auth-status" aria-live="polite"></p>
+              </section>
+
               <form id="compare-form">
                 <div class="field-grid">
                   <label class="field field-wide">
