@@ -16,10 +16,11 @@ const HOST = process.env.HOST || "0.0.0.0";
 const SEMRUSH_API_KEY = process.env.SEMRUSH_API_KEY || "";
 const SEMRUSH_ENDPOINT = "https://api.semrush.com/";
 const APP_PASSWORD = process.env.APP_PASSWORD || "";
-const ALLOWED_ORIGINS = String(process.env.ALLOWED_ORIGINS || "")
+const CONFIGURED_ALLOWED_ORIGINS = String(process.env.ALLOWED_ORIGINS || "")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
+const ALLOWED_ORIGINS = Array.from(new Set(["https://scottindc.github.io", ...CONFIGURED_ALLOWED_ORIGINS]));
 
 const DATABASES = {
   US: "us",
